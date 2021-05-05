@@ -1,8 +1,9 @@
+import { formatDate } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators'
+import { catchError, map, tap } from 'rxjs/operators'
 import Swal from 'sweetalert2';
 import { Cliente } from './cliente';
 
@@ -20,7 +21,23 @@ export class ClienteService {
 
   getClientes(): Observable<Cliente[]> {
 
-    return this.http.get<Cliente[]>(this.urlEndPoint);
+    return this.http.get(this.urlEndPoint).pipe(
+      tap(response => {
+        
+      }),
+      map(response => {
+
+        let clientes = response as Cliente[];
+
+        return clientes.map(cliente =>{
+          //cliente.createAt = formatDate(cliente.createAt, 'dd/MM/yyyy', 'en-US');
+
+          return cliente;
+          
+        })
+
+      })
+    );
 
   }
 
@@ -31,6 +48,12 @@ export class ClienteService {
         (response: any) => response.cliente as Cliente
       ),
       catchError(e => {
+
+        if(e.status == 400){
+
+          return throwError(e);
+
+        }
 
         Swal.fire(e.error.mensaje, e.error.error, 'error');
 
@@ -45,6 +68,12 @@ export class ClienteService {
 
     return this.http.put<any>(`${this.urlEndPoint}/${cliente.id}`, cliente, { headers: this.httpHeader }).pipe(
       catchError(e => {
+
+        if(e.status == 400){
+
+          return throwError(e);
+          
+        }
 
         Swal.fire(e.error.mensaje, e.error.error, 'error');
 

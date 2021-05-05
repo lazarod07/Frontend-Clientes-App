@@ -14,6 +14,8 @@ export class FormComponent implements OnInit {
 
   title: string = "Crear cliente";
 
+  errores: string[] = [];
+
   constructor(private clienteService: ClienteService, private router: Router, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -42,9 +44,15 @@ export class FormComponent implements OnInit {
 
     this.clienteService.create(this.cliente).subscribe(
       cliente => {
+
         this.router.navigate(['/clientes']);
 
         Swal.fire('Nuevo cliente', `El cliente ${cliente.nombre} ha sido creado con exito`, 'success');
+      },
+      err => {
+
+        this.errores = err.error.errors as string[];
+
       }
     );
 
